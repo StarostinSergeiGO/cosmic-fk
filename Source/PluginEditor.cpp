@@ -1,10 +1,18 @@
 #include "PluginEditor.h"
+#include <cmath>
 
 namespace
 {
     const juce::Colour cyan    { 0xff3df5ff };
     const juce::Colour magenta { 0xffff3fb4 };
     const juce::Colour violet  { 0xff8a4dff };
+
+    // Хелпер: точка на окружности (замена отсутствующего Point::getPointOnCircle)
+    inline juce::Point<float> pointOnCircle (juce::Point<float> centre, float radius, float angle)
+    {
+        return { centre.x + radius * std::cos (angle),
+                 centre.y + radius * std::sin (angle) };
+    }
 }
 
 //==============================================================================
@@ -21,8 +29,8 @@ void CosmicLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, int w
     {
         const float a = startAngle + (endAngle - startAngle) * (float) i / 10.0f;
         const bool major = (i % 5 == 0);
-        const auto p1 = c.getPointOnCircle (arcR + 10.0f, a);
-        const auto p2 = c.getPointOnCircle (arcR + (major ? 19.0f : 15.0f), a);
+        const auto p1 = pointOnCircle (c, arcR + 10.0f, a);
+        const auto p2 = pointOnCircle (c, arcR + (major ? 19.0f : 15.0f), a);
         const bool lit = ((float) i / 10.0f) <= pos + 0.001f;
         g.setColour (lit ? cyan.withAlpha (0.9f) : juce::Colours::white.withAlpha (0.25f));
         g.drawLine (p1.x, p1.y, p2.x, p2.y, major ? 2.0f : 1.2f);
@@ -63,15 +71,15 @@ void CosmicLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, int w
     g.drawEllipse (c.x - br * 0.62f, c.y - br * 0.62f, br * 1.24f, br * 1.24f, 1.0f);
 
     // указатель
-    const auto i1 = c.getPointOnCircle (br * 0.38f, angle);
-    const auto i2 = c.getPointOnCircle (br * 0.92f, angle);
+    const auto i1 = pointOnCircle (c, br * 0.38f, angle);
+    const auto i2 = pointOnCircle (c, br * 0.92f, angle);
     g.setColour (juce::Colours::white.withAlpha (0.25f));
     g.drawLine (i1.x, i1.y, i2.x, i2.y, 7.0f);
     g.setColour (juce::Colours::white);
     g.drawLine (i1.x, i1.y, i2.x, i2.y, 3.0f);
 
     // "звезда" на конце дуги
-    const auto tip = c.getPointOnCircle (arcR, angle);
+    const auto tip = pointOnCircle (c, arcR, angle);
     g.setColour (cyan.withAlpha (0.35f));
     g.fillEllipse (tip.x - 9.0f, tip.y - 9.0f, 18.0f, 18.0f);
     g.setColour (juce::Colours::white);
